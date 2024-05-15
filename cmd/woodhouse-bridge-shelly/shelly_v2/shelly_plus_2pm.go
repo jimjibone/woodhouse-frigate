@@ -25,11 +25,15 @@ func NewShellyPlus2PM(hostname, ip string, client *wh.Client) *ShellyPlus2PM {
 		shelly:  NewShellyComms(hostname, ip, clientsapi.Device_RELAY, client),
 		info:    services.NewInfo(),
 		online:  services.NewOnline(),
-		switch0: services.NewSwitchID("switch0"),
-		switch1: services.NewSwitchID("switch1"),
-		relay0:  services.NewRelayID("relay0"),
-		relay1:  services.NewRelayID("relay1"),
+		switch0: services.NewSwitch("switch0"),
+		switch1: services.NewSwitch("switch1"),
+		relay0:  services.NewRelay("relay0"),
+		relay1:  services.NewRelay("relay1"),
 	}
+
+	initRelay(dev.relay0)
+	initRelay(dev.relay1)
+
 	dev.shelly.OnConnected(dev.onConnected)
 	dev.shelly.OnDisconnected(dev.onDisconnected)
 	dev.shelly.OnResponseFrame(dev.onResponseFrame)
@@ -55,24 +59,6 @@ func (dev *ShellyPlus2PM) ID() string {
 
 func (dev *ShellyPlus2PM) Close() {
 	dev.shelly.Close()
-}
-
-func updateRelay(relay *services.Relay, val GetStatusResponseSwitch) {
-	if val.Output != nil {
-		relay.On.Set(*val.Output)
-	}
-	if val.AveragePower != nil {
-		relay.Power.Set(*val.AveragePower)
-	}
-	if val.Voltage != nil {
-		relay.Voltage.Set(*val.Voltage)
-	}
-	if val.Current != nil {
-		relay.Current.Set(*val.Current)
-	}
-	if val.Temperature != nil {
-		relay.Temperature.Set(val.Temperature.Centigrade)
-	}
 }
 
 func (dev *ShellyPlus2PM) onConnected(config GetConfigResponse, status GetStatusResponse) {
@@ -182,7 +168,7 @@ func (dev *ShellyPlus2PM) handleRelay0Action(request *clientsapi.ActionRequest, 
 		}
 	}
 
-	err := dev.shelly.RequestSwitchSet(switchSet)
+	err := dev.shelly.RequestSwitchSet(request.ActionId, switchSet)
 	if err != nil {
 		dev.shelly.log.Errorf("failed to set switch: %s", err)
 		return fmt.Errorf("failed to set switch: %w", err)
@@ -207,7 +193,7 @@ func (dev *ShellyPlus2PM) handleRelay1Action(request *clientsapi.ActionRequest, 
 		}
 	}
 
-	err := dev.shelly.RequestSwitchSet(switchSet)
+	err := dev.shelly.RequestSwitchSet(request.ActionId, switchSet)
 	if err != nil {
 		dev.shelly.log.Errorf("failed to set switch: %s", err)
 		return fmt.Errorf("failed to set switch: %w", err)
