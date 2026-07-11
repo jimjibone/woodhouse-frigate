@@ -1,8 +1,9 @@
 # woodhouse-frigate
 
-A Woodhouse bridge that connects to a [Frigate](https://frigate.video/) NVR
-instance and exposes its cameras as Woodhouse devices (motion + camera services),
-streaming snapshots and motion state into Woodhouse in real time.
+A [Woodhouse](https://github.com/jimjibone/woodhouse-core) bridge that connects
+to a [Frigate](https://frigate.video/) NVR instance and exposes its cameras as
+Woodhouse devices (motion + camera services), streaming snapshots and motion
+state into Woodhouse in real time.
 
 ## Usage
 
