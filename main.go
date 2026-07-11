@@ -6,8 +6,9 @@ import (
 	"sync"
 
 	"github.com/jimjibone/log"
-	"github.com/jimjibone/woodhouse-core/shared/stores"
-	"github.com/jimjibone/woodhouse-core/wh/v1"
+	"github.com/jimjibone/wh/v1/bridges"
+	"github.com/jimjibone/wh/v1/clients"
+	"github.com/jimjibone/wh/v1/shared/stores"
 	"github.com/urfave/cli/v2"
 )
 
@@ -58,13 +59,17 @@ func main() {
 			store := stores.NewFSStore(args.String("store"))
 
 			// Create the client.
-			client := wh.NewClient(
-				store,
-				args.String("addr"),
-				wh.WithClientID(args.String("id")),
-				wh.WithClientInfo("Frigate Bridge", "Bridge for integrating Frigate with Woodhouse", "0.1.0"),
-				wh.WithImages(),
-			)
+			client := bridges.NewBridge(bridges.BridgeConfig{
+				ClientConfig: clients.ClientConfig{
+					Store:             store,
+					ServerAddr:        args.String("addr"),
+					ClientID:          args.String("id"),
+					ClientName:        "Frigate Bridge",
+					ClientDescription: "Bridge for integrating Frigate with Woodhouse",
+					ClientVersion:     "0.1.0",
+				},
+				ImagesEnabled: true,
+			})
 
 			// Start the Frigate goroutine.
 			wg := &sync.WaitGroup{}

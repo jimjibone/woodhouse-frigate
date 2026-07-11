@@ -6,11 +6,10 @@ import (
 	"time"
 
 	"github.com/jimjibone/log"
+	"github.com/jimjibone/wh/v1/bridges"
+	"github.com/jimjibone/wh/v1/bridges/services"
 	clientsapi "github.com/jimjibone/woodhouse-api/go/v1/clients"
-	"github.com/jimjibone/woodhouse-core/cmd/woodhouse-frigate/api"
-	"github.com/jimjibone/woodhouse-core/wh/v1"
-	"github.com/jimjibone/woodhouse-core/wh/v1/devices"
-	"github.com/jimjibone/woodhouse-core/wh/v1/devices/services"
+	"github.com/jimjibone/woodhouse-frigate/api"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
@@ -19,17 +18,17 @@ type FrigateCamera struct {
 	log        *log.Context
 	serverAddr string
 	name       string
-	dev        *devices.Device
+	dev        *bridges.Device
 	motion     *services.Input
 	camera     *services.Camera
 }
 
-func NewFrigateCamera(serverAddr, name string, client *wh.Client) *FrigateCamera {
+func NewFrigateCamera(serverAddr, name string, client *bridges.Bridge) *FrigateCamera {
 	dev := &FrigateCamera{
 		log:        log.NewContext(log.DefaultLogger, name, log.DebugLevel),
 		serverAddr: serverAddr,
 		name:       name,
-		dev:        devices.NewDevice("frigate-"+name, clientsapi.Device_DEVICE),
+		dev:        bridges.NewDevice("frigate-"+name, clientsapi.Device_DEVICE),
 		motion:     services.NewInput("motion"),
 		camera:     services.NewCamera(""),
 	}

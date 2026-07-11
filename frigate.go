@@ -10,8 +10,8 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/jimjibone/log"
-	"github.com/jimjibone/woodhouse-core/cmd/woodhouse-frigate/api"
-	"github.com/jimjibone/woodhouse-core/wh/v1"
+	"github.com/jimjibone/wh/v1/bridges"
+	"github.com/jimjibone/woodhouse-frigate/api"
 )
 
 const (
@@ -25,18 +25,18 @@ type Frigate struct {
 	lastBackoff     time.Time
 	lastRestart     time.Time
 	backoffDuration time.Duration
-	client          *wh.Client
+	bridge          *bridges.Bridge
 	connMu          sync.RWMutex
 	conn            *websocket.Conn
 	caneras         map[string]*FrigateCamera // key=camera name
 }
 
-func (frig *Frigate) Run(ctx context.Context, client *wh.Client) error {
+func (frig *Frigate) Run(ctx context.Context, client *bridges.Bridge) error {
 	if frig.log == nil {
 		frig.log = log.NewContext(log.DefaultLogger, "frigate", log.DebugLevel)
 	}
 
-	frig.client = client
+	frig.bridge = client
 	frig.caneras = make(map[string]*FrigateCamera)
 
 	log.Infof("started")
@@ -100,7 +100,7 @@ func (frig *Frigate) connect(ctx context.Context) *websocket.Conn {
 
 	for name := range config.Cameras {
 		if _, found := frig.caneras[name]; !found {
-			frig.caneras[name] = NewFrigateCamera(frig.ServerAddr, name, frig.client)
+			frig.caneras[name] = NewFrigateCamera(frig.ServerAddr, name, frig.bridge)
 		}
 	}
 
