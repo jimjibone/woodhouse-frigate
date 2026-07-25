@@ -8,7 +8,7 @@ require (
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/jimjibone/log v0.0.0-20260606072821-03b097ef99de // indirect
 	github.com/jimjibone/queue v0.0.0-20251004200840-d3855e27766b // indirect
-	github.com/jimjibone/wh v0.0.0-20260711170118-e12200ffa790 // indirect
+	github.com/jimjibone/wh v0.0.0-20260724184323-3c5ae2c1888c // indirect
 	github.com/jimjibone/woodhouse-api v0.0.0-20260711162143-11e44122cfd4 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
