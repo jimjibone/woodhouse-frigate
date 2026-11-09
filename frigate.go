@@ -10,7 +10,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/jimjibone/log"
-	"github.com/jimjibone/wh/v1/bridges"
+	"github.com/jimjibone/wh/v2/bridges"
 	"github.com/jimjibone/woodhouse-frigate/api"
 )
 
@@ -100,7 +100,12 @@ func (frig *Frigate) connect(ctx context.Context) *websocket.Conn {
 
 	for name := range config.Cameras {
 		if _, found := frig.caneras[name]; !found {
-			frig.caneras[name] = NewFrigateCamera(frig.ServerAddr, name, frig.bridge)
+			camera, err := NewFrigateCamera(frig.ServerAddr, name, frig.bridge)
+			if err != nil {
+				frig.log.Errorf("failed to add camera: %s", err)
+				continue
+			}
+			frig.caneras[name] = camera
 		}
 	}
 
