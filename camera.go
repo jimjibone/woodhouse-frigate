@@ -9,6 +9,7 @@ import (
 	"github.com/jimjibone/log"
 	"github.com/jimjibone/wh/v2/bridges"
 	"github.com/jimjibone/wh/v2/bridges/services"
+	"github.com/jimjibone/wh/v2/types"
 	clientsapi "github.com/jimjibone/woodhouse-api/go/v2/clients"
 	"github.com/jimjibone/woodhouse-frigate/api"
 	"golang.org/x/text/cases"
@@ -82,6 +83,32 @@ func (cam *FrigateCamera) HandleMotion(payload json.RawMessage) {
 		}
 	default:
 		cam.log.Errorf("failed to parse motion state of: %s", payload)
+	}
+}
+
+// HandleEvent turns a Frigate tracked-object event into a camera detection
+// event. Only the first sighting ("new") of a real object is reported; updates
+// and ends of the same object, and false positives, are ignored.
+func (cam *FrigateCamera) HandleEvent(ev api.Event) {
+	if ev.Type != "new" || ev.After.FalsePositive || ev.After.Label == "" {
+		return
+	}
+	det := types.CameraDetectionEvent{Label: ev.After.Label}
+	score := ev.After.Score
+	if score <= 0 {
+		score = ev.After.TopScore
+	}
+	if score > 0 {
+		score = min(score, 1)
+		det.Score = &score
+	}
+	if len(ev.After.CurrentZones) > 0 {
+		zone := ev.After.CurrentZones[0]
+		det.Zone = &zone
+	}
+	cam.log.Infof("detected %s", det.Label)
+	if err := cam.camera.EmitDetection(det); err != nil {
+		cam.log.Errorf("failed to emit detection: %s", err)
 	}
 }
 

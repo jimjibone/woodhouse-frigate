@@ -163,6 +163,18 @@ func (frig *Frigate) recv(ctx context.Context, conn *websocket.Conn) {
 				api.SaveJSON("frigate-stats.json", frame.Payload)
 			}
 
+		case "events":
+			ev, err := api.ParseEvent(frame.Payload)
+			if err != nil {
+				frig.log.Errorf("unmarshal event: %s", err)
+				continue
+			}
+			if camera, found := frig.caneras[ev.After.Camera]; found {
+				camera.HandleEvent(ev)
+			} else {
+				frig.log.Errorf("received event for unknown camera: %s", frame)
+			}
+
 		default:
 			if strings.HasSuffix(frame.Topic, "/motion") {
 				name := strings.TrimSuffix(frame.Topic, "/motion")
