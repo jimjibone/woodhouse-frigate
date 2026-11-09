@@ -19,6 +19,20 @@ Key flags:
 - `--id` — bridge ID (default `frigate`)
 - `--debug` / `-v` — enable debug logging
 
+## Device shape (schema v2)
+
+One device per Frigate camera, id `frigate<camera name>` (camera name
+lowercased, reduced to `[a-z0-9]`; e.g. `garden-cam` is `frigategardencam`).
+
+- Endpoint `0`: `info`, `online`.
+- Endpoint `1`:
+  - `camera` (feature `snapshot`): `image` fetched from Frigate's
+    `/api/<camera>/latest.jpg` on request; `!detection{label, score?, zone?}`
+    emitted when Frigate reports a new tracked object (`events` topic, type
+    `new`, not a false positive). `zone` is the first current zone.
+  - `motion`: `motion` follows `<camera>/motion` ON/OFF; `!detected` is
+    emitted on each transition to ON.
+
 ## Taskfile tasks
 
 - `task build` — build the bridge binary into `build-<os>-<arch>/`
